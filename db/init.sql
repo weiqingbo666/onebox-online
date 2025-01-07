@@ -1,0 +1,21 @@
+-- 创建用户表
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_email (email)
+);
+
+-- 创建验证码表
+CREATE TABLE IF NOT EXISTS verification_codes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  code VARCHAR(6) NOT NULL,
+  type ENUM('LOGIN', 'REGISTER') NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email_type (email, type),
+  INDEX idx_expires_at (expires_at)
+);

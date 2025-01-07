@@ -1,0 +1,41 @@
+{
+  "name": "myform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.2",
+    "antd": "^5.22.5",
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "dashscope": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "framer-motion": "^11.16.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
+    "next": "15.1.0",
+    "nodemailer": "^6.9.16",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.7.2"
+  }
+}
