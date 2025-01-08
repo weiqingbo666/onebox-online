@@ -5,8 +5,8 @@ import { FiLogOut } from 'react-icons/fi';
 import MenuItem from './MenuItem';
 import Logo from './Logo';
 import DoingIcon from './DoingIcon';
-import DesignStudioIcon from './DesignStudioIcon';
 import Login from '../Login';
+import Dialog from '../Common/Dialog';
 
 interface NavigationProps {
   activeItem: string;
@@ -33,16 +33,41 @@ const Navigation: React.FC<NavigationProps> = ({ activeItem, onItemClick }) => {
       onItemClick('profile');
     }
   };
-
-  const handleLogout = () => {
-    // 清除localStorage中的用户信息和token
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    setUserEmail('');
-    // 刷新页面以更新状态
+const [dialog, setDialog] = useState<{
+  isOpen: boolean;
+  message: string;
+  type: 'info' | 'error' | 'warning' | 'success';
+}>({
+  isOpen: false,
+  message: '',
+  type: 'info'
+});
+const showDialog = (message: string, type: 'info' | 'error' | 'warning' | 'success' = 'info') => {
+  setDialog({ isOpen: true, message, type });
+  // 1秒后自动关闭对话框
+  setTimeout(() => {
+    setDialog(prev => ({ ...prev, isOpen: false }));
+  }, 1000);
+};
+const closeDialog = () => {
+  setDialog(prev => ({ ...prev, isOpen: false }));
+};
+const handleLoginSuccess = () => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    setUserEmail(user.email.split('@')[0]);
+  }
+  showDialog('登录成功！', 'success');
+};const handleLogout = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+  setUserEmail('');
+  showDialog('已退出登录', 'info');
+  setTimeout(() => {
     window.location.reload();
-  };
-
+  }, 1500);
+};
   const menuItems = [
     { id: 'box', icon: Logo, label: '一个盒子' },
     { id: 'generate', icon: DoingIcon, label: '一键生成' },
@@ -81,13 +106,24 @@ const Navigation: React.FC<NavigationProps> = ({ activeItem, onItemClick }) => {
         </div>
       </nav>
 
-      <Login 
-        isOpen={isLoginOpen} 
-        onClose={() => {
-          setIsLoginOpen(false);
-          onItemClick('box');
-        }} 
-      />
+     <>
+       {/* 现有的导航栏代码 */}
+       <Login 
+         isOpen={isLoginOpen} 
+         onClose={() => {
+           setIsLoginOpen(false);
+           onItemClick('box');
+         }}
+         onLoginSuccess={handleLoginSuccess}
+       />
+       <Dialog
+         isOpen={dialog.isOpen}
+         onClose={closeDialog}
+         message={dialog.message}
+         type={dialog.type}
+        
+       />
+     </>
     </>
   );
 }

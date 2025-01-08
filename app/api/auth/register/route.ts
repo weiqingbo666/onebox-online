@@ -1,39 +1,29 @@
-import { NextResponse } from 'next/server';
-import { db } from '../../../../db';
-import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import { Database } from '@/db';
+import { generateToken } from '@/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, password, verificationCode } = await req.json();
+    const { email, password, verificationCode } = await request.json();
 
     if (!email || !password || !verificationCode) {
       return NextResponse.json(
-        { error: '请填写所有必填项' },
+        { error: '所有字段都是必填的' },
         { status: 400 }
       );
     }
 
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // 验证验证码
+    const isValid = await Database.verifyCode(email, verificationCode, 'REGISTER');
+    if (!isValid) {
       return NextResponse.json(
-        { error: '邮箱格式不正确' },
+        { error: '验证码无效或已过期' },
         { status: 400 }
       );
     }
 
-    // 验证密码长度
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: '密码至少需要6个字符' },
-        { status: 400 }
-      );
-    }
-
-    // 检查用户是否已存在
-    const existingUser = await db.findUserByEmail(email);
+    // 检查邮箱是否已被注册
+    const existingUser = await Database.findUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         { error: '该邮箱已被注册' },
@@ -41,38 +31,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 验证验证码
-    const isValidCode = await db.verifyCode(email, verificationCode, 'REGISTER');
-    if (!isValidCode) {
-      return NextResponse.json(
-        { error: '验证码无效或已过期' },
-        { status: 400 }
-      );
-    }
+    // 创建新用户
+    const user = await Database.createUser(email, password);
+    const token = generateToken(user);
 
-    // 创建用户
-    const user = await db.createUser(email, password);
-
-    // 生成 token
-    const token = jwt.sign(
-      { 
-        userId: user.id,
-        email: user.email
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email
-      },
-      token
-    });
-
+    return NextResponse.json({ user, token });
   } catch (error) {
-    console.error('Register error:', error);
+    console.error('Registration error:', error);
     return NextResponse.json(
       { error: '注册失败，请重试' },
       { status: 500 }

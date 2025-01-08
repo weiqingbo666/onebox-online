@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from 'antd';
-import LoadingSpinner from './LoadingSpinner';
+import { motion } from 'framer-motion';
+import Dialog from '../Common/Dialog';
+
 import LoadingAnimation from './LoadingAnimation';
 
 interface DesignProps {
@@ -50,8 +52,7 @@ const categoryOptionsMap: Record<string, CategoryOptions> = {
   }
 };
 
-export default function Design({ isOpen, onClose }: DesignProps) {
-  // const [selectedProduct, setSelectedProduct] = useState<string>('');
+const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
   const [designConfig, setDesignConfig] = useState<DesignConfig>({
     productType: '食品饮品',
     element: '',
@@ -74,14 +75,12 @@ export default function Design({ isOpen, onClose }: DesignProps) {
   const [mounted, setMounted] = useState(false);
   const [dialog, setDialog] = useState<{
     isOpen: boolean;
-    type: 'info' | 'success' | 'warning' | 'error';
-    title: string;
     message: string;
+    type: 'info' | 'error' | 'warning' | 'success';
   }>({
     isOpen: false,
-    type: 'info',
-    title: '',
-    message: ''
+    message: '',
+    type: 'info'
   });
 
   useEffect(() => {
@@ -140,13 +139,7 @@ export default function Design({ isOpen, onClose }: DesignProps) {
       }
       // Continue polling for PENDING or RUNNING status
     } catch (error) {
-      console.error('Error checking task status:', error);
-      alert('检查任务状态时出错，请稍后重试');
-      setLoading(false);
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-        setPollingInterval(null);
-      }
+      showDialog('检查任务状态时出错，请稍后重试', 'error');
     }
   };
 
@@ -194,7 +187,7 @@ export default function Design({ isOpen, onClose }: DesignProps) {
 
   const handleGenerate = async () => {
     if (!designConfig.productType || !designConfig.element || !designConfig.style || !designConfig.color) {
-      alert('请完成所有选项的选择');
+      showDialog('请完成所有选项的选择', 'warning');
       return;
     }
 
@@ -231,19 +224,15 @@ export default function Design({ isOpen, onClose }: DesignProps) {
       
       setPollingInterval(interval);
     } catch (error) {
-      console.error('Error generating image:', error);
-      alert('生成图片时出错，请稍后重试');
-      setLoading(false);
+      showDialog('生成图片时出错，请稍后重试', 'error');
     }
   };
 
-  const showDialog = (type: 'info' | 'success' | 'warning' | 'error', title: string, message: string) => {
-    setDialog({
-      isOpen: true,
-      type,
-      title,
-      message
-    });
+  const showDialog = (message: string, type: 'info' | 'error' | 'warning' | 'success' = 'info') => {
+    setDialog({ isOpen: true, message, type });
+    setTimeout(() => {
+      setDialog(prev => ({ ...prev, isOpen: false }));
+    }, 1000);
   };
 
   const closeDialog = () => {
@@ -253,265 +242,260 @@ export default function Design({ isOpen, onClose }: DesignProps) {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="absolute inset-y-0 right-[0px] left-[230px] bg-gradient-to-br from-[#edf5cd] to-[#a3baae] flex items-center justify-center z-40"
-      onClick={onClose}
-    >
+    <>
       <div 
-        className="bg-white rounded-2xl w-[800px] min-h-[600px] relative p-6"
-        onClick={(e) => e.stopPropagation()}
+        className="absolute inset-y-0 right-[0px] left-[230px] bg-gradient-to-br from-[#edf5cd] to-[#a3baae] flex items-center justify-center z-40"
+        onClick={onClose}
       >
-        {/* Close Button */}
-        <button          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        <div 
+          className="bg-white rounded-2xl w-[800px] min-h-[600px] relative p-6"
+          onClick={(e) => e.stopPropagation()}
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          {/* Close Button */}
+          <button          onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-        {/* Title */}
-        <div className="flex items-center gap-2 mb-6">
-          <h2 className="text-lg font-medium">
-            {generatedImage ? '设计完成' : '你的设计信息'}
-          </h2>
-        </div>
+          {/* Title */}
+          <div className="flex items-center gap-2 mb-6">
+            <h2 className="text-lg font-medium">
+              {generatedImage ? '设计完成' : '你的设计信息'}
+            </h2>
+          </div>
 
-        {!generatedImage ? (
-          <div className="flex gap-8">
-            {/* Left Side - Preview */}
-            <div className="w-1/3 space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-medium mb-2">产品类型</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.keys(categoryOptionsMap).map((type) => (
+          {!generatedImage ? (
+            <div className="flex gap-8">
+              {/* Left Side - Preview */}
+              <div className="w-1/3 space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-2">产品类型</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.keys(categoryOptionsMap).map((type) => (
+                      <button 
+                        key={type}
+                        className={`px-4 py-3 rounded-xl text-sm text-center transition-all duration-200 hover:shadow-md ${
+                          designConfig.productType === type ? 'bg-[#e8ffd6] shadow-sm' : 'bg-white border hover:border-[#e8ffd6]'
+                        }`}
+                        onClick={() => handleProductTypeChange(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side - Chat */}
+              <div className="w-2/3 bg-[#f8faf0] rounded-lg p-4 min-h-[500px]">
+                {/* AI Message */}
+                <div className="flex gap-2 mb-4 animate-fadeIn">
+                  <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+                    <Image
+                      src="/logo.svg"
+                      alt="AI"
+                      width={20}
+                      height={20}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm mb-4">Hi👋, 我是你的包装设计AI助手，请回答以下问题，让我帮你完成自定义设计。</p>
+                  </div>
+                </div>
+
+                {/* Design Options */}
+                <div className="space-y-6">
+                  {/* Elements */}
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="text-sm mb-2">选择包装元素：</p>
+                    <div className="flex flex-wrap gap-2">
+                      {currentOptions.elements.map((element, index) => (
+                        <button
+                          key={`${designConfig.productType}-${element}`}
+                          className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                            designConfig.element === element ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                          }`}
+                          style={{ animationDelay: `${index * 25}ms` }}
+                          onClick={() => handleOptionSelect('element', element)}
+                        >
+                          {element}
+                        </button>
+                      ))}
+                      <button
+                        key={`${designConfig.productType}-element-custom`}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                          designConfig.element === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                        }`}
+                        style={{ animationDelay: `${currentOptions.elements.length * 25}ms` }}
+                        onClick={() => handleInputClick('element')}
+                      >
+                        {designConfig.element === '自定义' ? customInputs.element : '自定义（请输入）'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Styles */}
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="text-sm mb-2">选择设计风格：</p>
+                    <div className="flex flex-wrap gap-2">
+                      {currentOptions.styles.map((style, index) => (
+                        <button
+                          key={`${designConfig.productType}-${style}`}
+                          className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                            designConfig.style === style ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                          }`}
+                          style={{ animationDelay: `${index * 25}ms` }}
+                          onClick={() => handleOptionSelect('style', style)}
+                        >
+                          {style}
+                        </button>
+                      ))}
+                      <button
+                        key={`${designConfig.productType}-style-custom`}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                          designConfig.style === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                        }`}
+                        style={{ animationDelay: `${currentOptions.styles.length * 25}ms` }}
+                        onClick={() => handleInputClick('style')}
+                      >
+                        {designConfig.style === '自定义' ? customInputs.style : '自定义（请输入）'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Colors */}
+                  <div className="bg-white rounded-lg p-3">
+                    <p className="text-sm mb-2">选择颜色：</p>
+                    <div className="flex flex-wrap gap-2">
+                      {currentOptions.colors.map((color, index) => (
+                        <button
+                          key={`${designConfig.productType}-${color}`}
+                          className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                            designConfig.color === color ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                          }`}
+                          style={{ animationDelay: `${index * 25}ms` }}
+                          onClick={() => handleOptionSelect('color', color)}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                      <button
+                        key={`${designConfig.productType}-color-custom`}
+                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
+                          designConfig.color === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
+                        }`}
+                        style={{ animationDelay: `${currentOptions.colors.length * 25}ms` }}
+                        onClick={() => handleInputClick('color')}
+                      >
+                        {designConfig.color === '自定义' ? customInputs.color : '自定义（请输入）'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Input Area */}
+                {showInput && (
+                  <div className="relative mt-4">
+                    <input
+                      type="text"
+                      value={inputText}
+                      onChange={handleInputChange}
+                      placeholder={`请输入自定义${inputType === 'element' ? '元素' : inputType === 'style' ? '风格' : '颜色'}...`}
+                      className="w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:border-[#e8ffd6] focus:ring-1 focus:ring-[#e8ffd6] transition-colors duration-200"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleInputSubmit();
+                        }
+                      }}
+                    />
                     <button 
-                      key={type}
-                      className={`px-4 py-3 rounded-xl text-sm text-center transition-all duration-200 hover:shadow-md ${
-                        designConfig.productType === type ? 'bg-[#e8ffd6] shadow-sm' : 'bg-white border hover:border-[#e8ffd6]'
-                      }`}
-                      onClick={() => handleProductTypeChange(type)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-110"
+                      onClick={handleInputSubmit}
                     >
-                      {type}
+                      <svg className="w-6 h-6 text-gray-400 transition-colors duration-200 hover:text-[#e8ffd6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
                     </button>
-                  ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="relative w-full max-w-xl rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src={generatedImage} 
+                  alt="Generated design" 
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    console.error('Image failed to load');
+                  }}
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm">生成的设计图片</p>
+                    <div className="flex gap-3">
+                      <Button 
+                        type="primary"
+                        className="!bg-[#c3f53b] !text-black hover:!bg-[#b5e48c] border-none"
+                        size="small"
+                        onClick={() => window.open(generatedImage, '_blank')}
+                      >
+                        查看原图
+                      </Button>
+                      <Button 
+                        className="!bg-white/80 hover:!bg-white/90 !text-black border-none"
+                        size="small"
+                        onClick={() => {
+                          setGeneratedImage('');
+                          setLoading(false);
+                        }}
+                      >
+                        重新设计
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Right Side - Chat */}
-            <div className="w-2/3 bg-[#f8faf0] rounded-lg p-4 min-h-[500px]">
-              {/* AI Message */}
-              <div className="flex gap-2 mb-4 animate-fadeIn">
-                <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
-                  <Image
-                    src="/logo.svg"
-                    alt="AI"
-                    width={20}
-                    height={20}
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm mb-4">Hi👋, 我是你的包装设计AI助手，请回答以下问题，让我帮你完成自定义设计。</p>
-                </div>
+          {/* Generate Button and Loading State */}
+          {!generatedImage && (
+            <>
+              <div className="mt-6 flex flex-col items-center">
+                <Button
+                  onClick={handleGenerate}
+                  disabled={loading}
+                  className={`w-40 h-10 text-base font-medium rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
+                    loading 
+                      ? 'opacity-0'
+                      : 'bg-[#c3f53b] text-black hover:bg-[#b5e48c] hover:shadow-md active:scale-95'
+                  }`}
+                >
+                  生成设计
+                </Button>
               </div>
-
-              {/* Design Options */}
-              <div className="space-y-6">
-                {/* Elements */}
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm mb-2">选择包装元素：</p>
-                  <div className="flex flex-wrap gap-2">
-                    {currentOptions.elements.map((element, index) => (
-                      <button
-                        key={`${designConfig.productType}-${element}`}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                          designConfig.element === element ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                        }`}
-                        style={{ animationDelay: `${index * 25}ms` }}
-                        onClick={() => handleOptionSelect('element', element)}
-                      >
-                        {element}
-                      </button>
-                    ))}
-                    <button
-                      key={`${designConfig.productType}-element-custom`}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                        designConfig.element === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                      }`}
-                      style={{ animationDelay: `${currentOptions.elements.length * 25}ms` }}
-                      onClick={() => handleInputClick('element')}
-                    >
-                      {designConfig.element === '自定义' ? customInputs.element : '自定义（请输入）'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Styles */}
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm mb-2">选择设计风格：</p>
-                  <div className="flex flex-wrap gap-2">
-                    {currentOptions.styles.map((style, index) => (
-                      <button
-                        key={`${designConfig.productType}-${style}`}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                          designConfig.style === style ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                        }`}
-                        style={{ animationDelay: `${index * 25}ms` }}
-                        onClick={() => handleOptionSelect('style', style)}
-                      >
-                        {style}
-                      </button>
-                    ))}
-                    <button
-                      key={`${designConfig.productType}-style-custom`}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                        designConfig.style === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                      }`}
-                      style={{ animationDelay: `${currentOptions.styles.length * 25}ms` }}
-                      onClick={() => handleInputClick('style')}
-                    >
-                      {designConfig.style === '自定义' ? customInputs.style : '自定义（请输入）'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Colors */}
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm mb-2">选择颜色：</p>
-                  <div className="flex flex-wrap gap-2">
-                    {currentOptions.colors.map((color, index) => (
-                      <button
-                        key={`${designConfig.productType}-${color}`}
-                        className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                          designConfig.color === color ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                        }`}
-                        style={{ animationDelay: `${index * 25}ms` }}
-                        onClick={() => handleOptionSelect('color', color)}
-                      >
-                        {color}
-                      </button>
-                    ))}
-                    <button
-                      key={`${designConfig.productType}-color-custom`}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 hover:shadow-sm animate-slideIn ${
-                        designConfig.color === '自定义' ? 'bg-[#e8ffd6]' : 'bg-white border hover:border-[#e8ffd6] hover:scale-105'
-                      }`}
-                      style={{ animationDelay: `${currentOptions.colors.length * 25}ms` }}
-                      onClick={() => handleInputClick('color')}
-                    >
-                      {designConfig.color === '自定义' ? customInputs.color : '自定义（请输入）'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Input Area */}
-              {showInput && (
-                <div className="relative mt-4">
-                  <input
-                    type="text"
-                    value={inputText}
-                    onChange={handleInputChange}
-                    placeholder={`请输入自定义${inputType === 'element' ? '元素' : inputType === 'style' ? '风格' : '颜色'}...`}
-                    className="w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:border-[#e8ffd6] focus:ring-1 focus:ring-[#e8ffd6] transition-colors duration-200"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleInputSubmit();
-                      }
-                    }}
-                  />
-                  <button 
-                    className="absolute right-2 top-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-110"
-                    onClick={handleInputSubmit}
-                  >
-                    <svg className="w-6 h-6 text-gray-400 transition-colors duration-200 hover:text-[#e8ffd6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                    </svg>
-                  </button>
+              {loading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/5 backdrop-blur-sm z-50">
+                  <LoadingAnimation />
                 </div>
               )}
-            </div>
-          </div>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="relative w-full max-w-xl rounded-lg overflow-hidden shadow-lg">
-              <img 
-                src={generatedImage} 
-                alt="Generated design" 
-                className="w-full h-auto"
-                onError={(e) => {
-                  console.error('Image failed to load');
-                }}
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm">生成的设计图片</p>
-                  <div className="flex gap-3">
-                    <Button 
-                      type="primary"
-                      className="!bg-[#c3f53b] !text-black hover:!bg-[#b5e48c] border-none"
-                      size="small"
-                      onClick={() => window.open(generatedImage, '_blank')}
-                    >
-                      查看原图
-                    </Button>
-                    <Button 
-                      className="!bg-white/80 hover:!bg-white/90 !text-black border-none"
-                      size="small"
-                      onClick={() => {
-                        setGeneratedImage('');
-                        setLoading(false);
-                      }}
-                    >
-                      重新设计
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Generate Button and Loading State */}
-        {!generatedImage && (
-          <>
-            <div className="mt-6 flex flex-col items-center">
-              <Button
-                onClick={handleGenerate}
-                disabled={loading}
-                className={`w-40 h-10 text-base font-medium rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${
-                  loading 
-                    ? 'opacity-0'
-                    : 'bg-[#c3f53b] text-black hover:bg-[#b5e48c] hover:shadow-md active:scale-95'
-                }`}
-              >
-                生成设计
-              </Button>
-            </div>
-            {loading && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black/5 backdrop-blur-sm z-50">
-                <LoadingAnimation />
-              </div>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      <Dialog
+        isOpen={dialog.isOpen}
+        onClose={closeDialog}
+        message={dialog.message}
+        type={dialog.type}
+      />
+    </>
   );
 };
 
-<style jsx global>{`
-  @keyframes spin-slow {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .animate-spin-slow {
-    animation: spin-slow 20s linear infinite;
-  }
-`}</style>
+export default Design;

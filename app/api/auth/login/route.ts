@@ -1,92 +1,60 @@
-import { NextResponse } from 'next/server';
-import { db } from '../../../../db';
-import jwt from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import { Database } from '@/db';
+import { generateToken } from '@/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, password, verificationCode, loginType } = await req.json();
+    const { email, password, verificationCode, loginType } = await request.json();
 
-    if (!email || (!password && !verificationCode) || !loginType) {
+    if (!email) {
       return NextResponse.json(
-        { error: '请填写所有必填项' },
+        { error: '邮箱不能为空' },
         { status: 400 }
       );
     }
 
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: '邮箱格式不正确' },
-        { status: 400 }
-      );
-    }
-
-    // 获取用户信息
-    const user = await db.findUserByEmail(email);
-    if (!user) {
-      return NextResponse.json(
-        { error: '用户不存在' },
-        { status: 400 }
-      );
-    }
-
-    let isValidLogin = false;
+    const user = await Database.findUserByEmail(email);
 
     if (loginType === 'password') {
-      // 密码登录
       if (!password) {
         return NextResponse.json(
-          { error: '请输入密码' },
+          { error: '密码不能为空' },
           { status: 400 }
         );
       }
 
-      isValidLogin = await db.verifyPassword(user, password);
-      if (!isValidLogin) {
+      if (!user || !await Database.verifyPassword(user, password)) {
         return NextResponse.json(
-          { error: '密码错误' },
-          { status: 400 }
+          { error: '邮箱或密码错误' },
+          { status: 401 }
         );
       }
     } else {
-      // 验证码登录
       if (!verificationCode) {
         return NextResponse.json(
-          { error: '请输入验证码' },
+          { error: '验证码不能为空' },
           { status: 400 }
         );
       }
 
-      isValidLogin = await db.verifyCode(email, verificationCode, 'LOGIN');
-      if (!isValidLogin) {
+      const isValid = await Database.verifyCode(email, verificationCode, 'LOGIN');
+      if (!isValid) {
         return NextResponse.json(
           { error: '验证码无效或已过期' },
-          { status: 400 }
+          { status: 401 }
         );
+      }
+
+      // 如果用户不存在，为验证码登录创建一个新用户
+      if (!user) {
+        const newUser = await Database.createUser(email);
+        const token = generateToken(newUser);
+        return NextResponse.json({ user: newUser, token });
       }
     }
 
-    // 生成 token
-    const token = jwt.sign(
-      { 
-        userId: user.id,
-        email: user.email
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email
-      },
-      token
-    });
-
+    const token = generateToken(user);
+    return NextResponse.json({ user, token });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
