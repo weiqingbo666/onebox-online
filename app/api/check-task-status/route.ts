@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-<<<<<<< HEAD
-const DASHSCOPE_API_KEY = "sk-1bc48e8906a5465ab239fd699d25f5b1";
-=======
 const DASHSCOPE_API_KEY = "sk-8e6a89e9266e492c98acbd2c61e3def5";
->>>>>>> dd6d6e9c06842dda6c8173aec3e4ce9c303a687c
 const API_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks';
 
 export async function GET(req: NextRequest) {
