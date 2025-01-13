@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from 'antd';
-import { motion } from 'framer-motion';
+
 import Dialog from '../Common/Dialog';
 
 import LoadingAnimation from './LoadingAnimation';
@@ -110,6 +110,7 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
         setPollingInterval(null);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, mounted]);
 
   const currentOptions = designConfig.productType ? categoryOptionsMap[designConfig.productType] : {
@@ -139,7 +140,7 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
       }
       // Continue polling for PENDING or RUNNING status
     } catch (error) {
-      showDialog('检查任务状态时出错，请稍后重试', 'error');
+      showDialog('检查任务状态时出错，请稍后重试'+error);
     }
   };
 
@@ -224,7 +225,7 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
       
       setPollingInterval(interval);
     } catch (error) {
-      showDialog('生成图片时出错，请稍后重试', 'error');
+      showDialog('生成图片时出错，请稍后重试'+error);
     }
   };
 
@@ -426,12 +427,12 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="relative w-full max-w-xl rounded-lg overflow-hidden shadow-lg">
-                <img 
+                <Image  
                   src={generatedImage} 
                   alt="Generated design" 
                   className="w-full h-auto"
-                  onError={(e) => {
-                    console.error('Image failed to load');
+                  onError={(error) => {
+                    console.error('Image failed to load'+error);
                   }}
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4">

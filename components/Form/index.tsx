@@ -70,9 +70,7 @@ const DESIGN_IMAGES = [
 ];
 
 export default function CustomForm() {
-  const handleGenerateClick = () => {
-    // TODO: 处理生成逻辑
-  };
+
 
   return (
     <div className="h-full flex flex-col">

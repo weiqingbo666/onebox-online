@@ -17,7 +17,7 @@ export default function MenuItem({ icon: Icon, label, active, onClick }: MenuIte
       <div className={`flex flex-col items-center justify-center w-full ${
         active ? 'text-green-500 bg-white/10' : 'text-gray-400'
       } group-hover:text-green-500 group-hover:bg-white/15 p-2 rounded-lg`}>
-        <Icon className="w-8 h-8 -mt-1" active={active ? "true" : undefined} />
+        <Icon className="w-8 h-8 -mt-1" active={active} />
         <span className="text-[8px] text-center">{label}</span>
       </div>
     </div>
