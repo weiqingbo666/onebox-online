@@ -16,7 +16,7 @@ const dbConfig = {
   user: 'onebox',
   password: '9TXMan.!g9jfv7K',
   database: 'onebox',
-  waitForConnections: true,
+  waitForConnections: true, 
   connectionLimit: 20,
   queueLimit: 0
 };

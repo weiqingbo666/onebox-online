@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+
 import { Button } from 'antd';
 
 import Dialog from '../Common/Dialog';
@@ -295,7 +295,7 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
                 {/* AI Message */}
                 <div className="flex gap-2 mb-4 animate-fadeIn">
                   <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
-                    <Image
+                    <img
                       src="/logo.svg"
                       alt="AI"
                       width={20}
@@ -427,7 +427,7 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="relative w-full max-w-xl rounded-lg overflow-hidden shadow-lg">
-                <Image  
+                <img 
                   src={generatedImage} 
                   alt="Generated design" 
                   className="w-full h-auto"
