@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Database } from '@/db';
+import { sendVerificationEmail } from '@/utils/email';
 
 function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // 生成一个由大写字母和数字组成的8位验证码
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 排除容易混淆的字符(I,O,0,1)
+  let code = '';
+  
+  // 前4位是字母
+  for (let i = 0; i < 4; i++) {
+    const letterIndex = Math.floor(Math.random() * 24); // 只使用字母部分
+    code += chars[letterIndex];
+  }
+  
+  // 添加分隔符
+  code += '-';
+  
+  // 后4位是数字
+  for (let i = 0; i < 4; i++) {
+    const numberIndex = Math.floor(Math.random() * 8) + 24; // 使用数字部分
+    code += chars[numberIndex];
+  }
+  
+  return code;
 }
 
 export async function POST(request: NextRequest) {
@@ -16,15 +36,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 生成6位验证码
+    // 生成验证码
     const code = generateVerificationCode();
 
     // 保存验证码到数据库
     await Database.saveVerificationCode(email, code, type);
 
-    // TODO: 在这里集成实际的邮件发送服务
-    // 目前仅打印到控制台用于测试
-    console.log(`验证码 ${code} 已发送到邮箱 ${email}`);
+    try {
+      // 发送验证码邮件
+      await sendVerificationEmail(email, code, type);
+    } catch (emailError) {
+      console.error('Send email error:', emailError);
+      return NextResponse.json(
+        { error: '发送验证码邮件失败，请检查邮箱地址是否正确' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       message: '验证码已发送',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Design from '../Design';
 
 const RightNavigation: React.FC = () => {
@@ -14,7 +15,7 @@ const RightNavigation: React.FC = () => {
           </p>
         </div>
         <div className="w-full p-4 bg-white rounded-lg shadow-sm mb-4">
-          <img 
+          <Image 
             src="/planleft.svg" 
             alt="Plan Left"
             className="w-full object-contain"
@@ -25,7 +26,7 @@ const RightNavigation: React.FC = () => {
             onClick={() => setIsDesignOpen(true)}
             className="w-full h-12 bg-[#b5e48c] text-black rounded-full hover:bg-[#99d363] shadow-sm flex items-center justify-center gap-2"
           >
-            <img src="/vector.svg" alt="Vector icon" className="w-5 h-5" />
+            <Image src="/vector.svg" alt="Vector icon" className="w-5 h-5" />
             自定义设计
           </button>
         </div>

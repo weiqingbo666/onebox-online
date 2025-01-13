@@ -24,7 +24,7 @@ const Dialog: React.FC<DialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const [isClosing, setIsClosing] = useState(false);
+  const [, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
