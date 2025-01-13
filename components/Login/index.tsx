@@ -268,7 +268,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                             }
                             placeholder={loginType === 'password' ? "输入密码" : "输入验证码"}
                             className="flex-1 px-4 py-3 outline-none"
-                            maxLength={loginType === 'password' ? undefined : 6}
+                            maxLength={loginType === 'password' ? undefined : 9}
                           />
                           {loginType === 'password' ? (
                             <button
@@ -358,7 +358,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                             onChange={(e) => setVerificationCode(e.target.value)}
                             placeholder="输入验证码"
                             className="flex-1 px-4 py-3 outline-none"
-                            maxLength={6}
+                            maxLength={9}
                           />
                           <button
                             type="button"

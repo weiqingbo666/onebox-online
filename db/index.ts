@@ -81,12 +81,30 @@ export class Database {
   // 保存验证码
   static async saveVerificationCode(email: string, code: string, type: 'LOGIN' | 'REGISTER') {
     try {
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+      // 设置过期时间为10分钟后，使用东八区时间
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      
+      // 删除该邮箱之前的验证码
+      await pool.execute(
+        'DELETE FROM verification_codes WHERE email = ? AND type = ?',
+        [email, type]
+      );
+
+      // 保存新的验证码
       const [result] = await pool.execute(
         `INSERT INTO verification_codes (email, code, type, expires_at)
-         VALUES (?, ?, ?, ?)`,
+         VALUES (?, ?, ?, CONVERT_TZ(?, 'SYSTEM', '+08:00'))`,
         [email, code, type, expiresAt]
       );
+
+      // 记录保存的验证码信息（用于调试）
+      console.log('Verification code saved:', {
+        email,
+        code,
+        type,
+        expiresAt
+      });
+
       return result;
     } catch (error) {
       console.error('Error saving verification code:', error);
@@ -97,15 +115,33 @@ export class Database {
   // 验证验证码
   static async verifyCode(email: string, code: string, type: 'LOGIN' | 'REGISTER'): Promise<boolean> {
     try {
+      // 首先获取最近的验证码记录
       const [rows] = await pool.execute(
         `SELECT * FROM verification_codes 
-         WHERE email = ? AND code = ? AND type = ? AND expires_at > NOW()
+         WHERE email = ? 
+         AND UPPER(code) = UPPER(?) 
+         AND type = ? 
+         AND expires_at > CONVERT_TZ(NOW(), 'SYSTEM', '+08:00')
          ORDER BY created_at DESC LIMIT 1`,
         [email, code, type]
       );
       
       const codes = rows as VerificationCode[];
-      return codes.length > 0;
+      if (codes.length === 0) {
+        console.log('No valid code found for:', { email, code, type });
+        return false;
+      }
+
+      // 记录验证成功的验证码信息（用于调试）
+      console.log('Valid code found:', {
+        email,
+        code,
+        type,
+        expiresAt: codes[0].expires_at,
+        now: new Date()
+      });
+
+      return true;
     } catch (error) {
       console.error('Error verifying code:', error);
       throw error;
