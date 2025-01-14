@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY;
+const DASHSCOPE_API_KEY ="sk-1bc48e8906a5465ab239fd699d25f5b1";
 const API_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks';
 
 export async function GET(req: NextRequest) {

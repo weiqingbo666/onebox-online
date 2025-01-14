@@ -4,7 +4,7 @@ interface LoadingAnimationProps {
   onComplete?: () => void;
 }
 
-const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ onComplete }) => {
+const LoadingAnimation: React.FC<LoadingAnimationProps> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

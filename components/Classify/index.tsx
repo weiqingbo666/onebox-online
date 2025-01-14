@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, JSX } from 'react';
 import Image from 'next/image';
 
 interface ClassifyItemProps {
@@ -31,16 +31,31 @@ export default function Classify() {
   
   const menuItems = [
     { 
-      icon: <Image src="/plan.svg" width={24} height={24} alt="包装设计" className={activeItem === '包装设计' ? 'text-green-500' : 'text-gray-700'} />,
+      icon: (
+        <div className="relative w-6 h-6">
+          <Image 
+            src="/plan.svg" 
+            alt="包装设计" 
+            fill
+            className={activeItem === '包装设计' ? 'text-green-500' : 'text-gray-700'} 
+          />
+        </div>
+      ),
       label: '包装设计' 
     },
-   
   ];
 
   return (
     <div className="w-full max-w-[200px] rounded-2xl p-4 space-y-4" style={{ backgroundColor: '#fafde9' }}>
       <div className="flex items-center px-3 py-1.5 bg-black text-white text-sm font-medium rounded-full">
-        <Image src="/add.svg" width={16} height={16} alt="add" className="mr-1" />
+        <div className="relative w-4 h-4 mr-1">
+          <Image 
+            src="/add.svg" 
+            alt="add" 
+            fill
+            className="object-contain"
+          />
+        </div>
         更多包装类型
       </div>
       <div className="space-y-2">

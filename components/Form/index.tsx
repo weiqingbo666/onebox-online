@@ -70,9 +70,7 @@ const DESIGN_IMAGES = [
 ];
 
 export default function CustomForm() {
-  const handleGenerateClick = () => {
-    // TODO: 处理生成逻辑
-  };
+
 
   return (
     <div className="h-full flex flex-col">
@@ -81,14 +79,14 @@ export default function CustomForm() {
           {/* Header with Avatar and Message */}
           <div className="max-w-2xl">
             <div className="flex items-start space-x-4 mb-8">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-black flex items-center justify-center">
-                <Image src="/gift-icon.svg" alt="Gift Icon" width={24} height={24} />
+              <div className="w-23 h-23 rounded-full overflow-hidden bg-black flex items-center justify-center">
+                <Image src="/plan.svg" alt="Gift Icon" width={80} height={80} />
               </div>
               <div className="flex-1">
                 <div className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="font-bold mb-1 text-4xl">👋我是你的包装设计助手</div>
                   <div className="flex items-center font-bold">
-                    <span className="text-3xl">我们现在来一键生成设计图吧</span>
+                    <span className="text-4xl">我们现在来一键生成设计图吧</span>
                     <span className="ml-1 text-3xl">🚀</span>
                   </div>
                 </div>
@@ -112,7 +110,7 @@ export default function CustomForm() {
          
       <div className="p-6 border-t bg-white">
         <div className="flex justify-center">
-          <button className="bg-[#c1ff2f] text-black font-semibold px-6 py-2 rounded-full flex items-center space-x-2">
+          <button className="bg-[#b2ff3b] text-black font-semibold px-6 py-2 rounded-[15px] flex items-center space-x-2">
             <Image src="/lightning.svg" alt="Lightning" width={20} height={20} />
             <span>一键生成</span>
           </button>
