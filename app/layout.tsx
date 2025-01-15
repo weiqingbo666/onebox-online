@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import AppContextProvider from "@/components/AppContext";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "Onebox",
@@ -15,6 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body
         className="dark"
       >
