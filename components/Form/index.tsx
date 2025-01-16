@@ -62,15 +62,29 @@ const DesignImage: React.FC<DesignImageProps> = ({ src, alt, index }) => {
   );
 };
 
-const DESIGN_IMAGES = [
-  { src: '/image1.png', alt: 'Design Image 1' },
-  { src: '/image2.png', alt: 'Design Image 2' },
-  { src: '/image3.png', alt: 'Design Image 3' },
-  { src: '/image4.png', alt: 'Design Image 4' },
-];
+interface FormProps {
+  currentGroup: number;
+  onGroupChange: (newGroup: number) => void;
+}
 
-export default function CustomForm() {
+export default function CustomForm({ currentGroup, onGroupChange }: FormProps) {
+  const [images, setImages] = useState([
+    { src: `/1_a.png`, alt: 'Design Image 1' },
+    { src: `/1_b.png`, alt: 'Design Image 2' },
+    { src: `/1_c.png`, alt: 'Design Image 3' },
+    { src: `/1_d.png`, alt: 'Design Image 4' },
+  ]);
 
+  const handleGenerateClick = () => {
+    const nextGroup = currentGroup === 6 ? 1 : currentGroup + 1;
+    onGroupChange(nextGroup);
+    setImages([
+      { src: `/${nextGroup}_a.png`, alt: 'Design Image 1' },
+      { src: `/${nextGroup}_b.png`, alt: 'Design Image 2' },
+      { src: `/${nextGroup}_c.png`, alt: 'Design Image 3' },
+      { src: `/${nextGroup}_d.png`, alt: 'Design Image 4' },
+    ]);
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -97,7 +111,7 @@ export default function CustomForm() {
           {/* Image Grid */}
           <div className="bg-[#fbfeed] rounded-2xl overflow-hidden w-[512px] h-[512px]">
             <div className="grid grid-cols-2 w-full h-full">
-              {DESIGN_IMAGES.map((image, index) => (
+              {images.map((image, index) => (
                 <DesignImage 
                   key={image.src}
                   {...image}
@@ -110,15 +124,16 @@ export default function CustomForm() {
          
       <div className="p-6 border-t bg-white">
         <div className="flex justify-center">
-          <button className="bg-[#b2ff3b] text-black font-semibold px-6 py-2 rounded-[15px] flex items-center space-x-2">
+          <button 
+            onClick={handleGenerateClick}
+            className="bg-[#b2ff3b] text-black font-semibold px-6 py-2 rounded-[15px] flex items-center space-x-2"
+          >
             <Image src="/lightning.svg" alt="Lightning" width={20} height={20} />
             <span>一键生成</span>
           </button>
         </div>
       </div>
       </div>
-
-
     </div>
   );
 }
