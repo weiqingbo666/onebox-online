@@ -3,25 +3,11 @@ import { Database } from '@/db';
 import { sendVerificationEmail } from '@/utils/email';
 
 function generateVerificationCode(): string {
-  // 生成一个由大写字母和数字组成的8位验证码
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 排除容易混淆的字符(I,O,0,1)
+  // 生成4位数字验证码
   let code = '';
-  
-  // 前4位是字母
   for (let i = 0; i < 4; i++) {
-    const letterIndex = Math.floor(Math.random() * 24); // 只使用字母部分
-    code += chars[letterIndex];
+    code += Math.floor(Math.random() * 10).toString();
   }
-  
-  // 添加分隔符
-  code += '-';
-  
-  // 后4位是数字
-  for (let i = 0; i < 4; i++) {
-    const numberIndex = Math.floor(Math.random() * 8) + 24; // 使用数字部分
-    code += chars[numberIndex];
-  }
-  
   return code;
 }
 

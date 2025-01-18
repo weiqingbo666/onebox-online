@@ -92,16 +92,16 @@ export default function CustomForm({ currentGroup, onGroupChange }: FormProps) {
         <div className="p-8">
           {/* Header with Avatar and Message */}
           <div className="max-w-2xl">
-            <div className="flex items-start space-x-4 mb-8">
-              <div className="w-23 h-23 rounded-full overflow-hidden bg-black flex items-center justify-center">
-                <Image src="/plan.svg" alt="Gift Icon" width={80} height={80} />
+            <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+              <div className="w-16 sm:w-23 h-16 sm:h-23 rounded-full overflow-hidden bg-black flex items-center justify-center">
+                <Image src="/plan.svg" alt="Gift Icon" width={80} height={80} className="scale-75 sm:scale-100" />
               </div>
               <div className="flex-1">
                 <div className="bg-white rounded-2xl p-4 shadow-sm">
-                  <div className="font-bold mb-1 text-4xl">👋我是你的包装设计助手</div>
+                  <div className="font-bold mb-1 text-2xl sm:text-4xl">👋我是你的包装设计助手</div>
                   <div className="flex items-center font-bold">
-                    <span className="text-4xl">我们现在来一键生成设计图吧</span>
-                    <span className="ml-1 text-3xl">🚀</span>
+                    <span className="text-2xl sm:text-4xl">我们现在来一键生成设计图吧</span>
+                    <span className="ml-1 text-xl sm:text-3xl">🚀</span>
                   </div>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export default function CustomForm({ currentGroup, onGroupChange }: FormProps) {
           </div>
 
           {/* Image Grid */}
-          <div className="bg-[#fbfeed] rounded-2xl overflow-hidden w-[512px] h-[512px]">
+          <div className="bg-[#fbfeed] rounded-2xl overflow-hidden w-full sm:w-[512px] h-[512px]">
             <div className="grid grid-cols-2 w-full h-full">
               {images.map((image, index) => (
                 <DesignImage 
