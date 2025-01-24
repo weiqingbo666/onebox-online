@@ -81,7 +81,7 @@ export class Database {
   // 保存验证码
   static async saveVerificationCode(email: string, code: string, type: 'LOGIN' | 'REGISTER') {
     try {
-      // 设置过期时间为10分钟后，使用东八区时间
+      // 设置过期时间为10分钟后
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
       
       // 删除该邮箱之前的验证码
@@ -90,10 +90,10 @@ export class Database {
         [email, type]
       );
 
-      // 保存新的验证码
+      // 保存新的验证码，使用UTC时间
       const [result] = await pool.execute(
         `INSERT INTO verification_codes (email, code, type, expires_at)
-         VALUES (?, ?, ?, CONVERT_TZ(?, 'SYSTEM', '+08:00'))`,
+         VALUES (?, ?, ?, ?)`,
         [email, code, type, expiresAt]
       );
 
@@ -115,13 +115,13 @@ export class Database {
   // 验证验证码
   static async verifyCode(email: string, code: string, type: 'LOGIN' | 'REGISTER'): Promise<boolean> {
     try {
-      // 首先获取最近的验证码记录
+      // 使用UTC时间进行比较
       const [rows] = await pool.execute(
         `SELECT * FROM verification_codes 
          WHERE email = ? 
          AND UPPER(code) = UPPER(?) 
          AND type = ? 
-         AND expires_at > CONVERT_TZ(NOW(), 'SYSTEM', '+08:00')
+         AND expires_at > NOW()
          ORDER BY created_at DESC LIMIT 1`,
         [email, code, type]
       );

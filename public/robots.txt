@@ -1,5 +1,29 @@
+# OneBox Website Robots Rules
 User-agent: *
 Allow: /
+Allow: /sitemap.xml
+Allow: /images/
 Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /admin/
+Disallow: /temp/
 
-Sitemap: https://onebox.com/sitemap.xml
+# Crawl-delay
+Crawl-delay: 10
+
+# Sitemaps
+Sitemap: https://one-box.top/sitemap.xml
+
+# Additional rules for specific bots
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 10
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 10
+
+User-agent: bingbot
+Allow: /
+Crawl-delay: 10

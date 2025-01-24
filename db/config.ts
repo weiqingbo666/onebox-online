@@ -8,7 +8,9 @@ const dbConfig = {
   database: 'onebox',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+00:00', // 使用UTC时区
+  dateStrings: true   // 将日期作为字符串返回
 };
 
 
