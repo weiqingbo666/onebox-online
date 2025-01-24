@@ -75,8 +75,13 @@ export default function CustomForm({ currentGroup, onGroupChange }: FormProps) {
     { src: `/1_d.png`, alt: 'Design Image 4' },
   ]);
 
+  const getRandomGroup = (current: number): number => {
+    const available = Array.from({length: 30}, (_, i) => i + 1).filter(num => num !== current);
+    return available[Math.floor(Math.random() * available.length)];
+  };
+
   const handleGenerateClick = () => {
-    const nextGroup = currentGroup === 6 ? 1 : currentGroup + 1;
+    const nextGroup = getRandomGroup(currentGroup);
     onGroupChange(nextGroup);
     setImages([
       { src: `/${nextGroup}_a.png`, alt: 'Design Image 1' },

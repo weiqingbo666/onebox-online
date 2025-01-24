@@ -4,9 +4,10 @@ import Design from '../Design';
 
 interface RightNavigationProps {
   currentPrompt: string;
+  currentGroup: number;
 }
 
-const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt }) => {
+const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt, currentGroup }) => {
   const [isDesignOpen, setIsDesignOpen] = useState(false);
 
   return (
@@ -27,15 +28,15 @@ const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt }) => {
           <div className="h-[250px] md:h-[45%] w-full p-4 bg-white rounded-lg shadow-sm mb-4">
             <div className="relative w-full h-full">
               <Image 
-                src="/planleft.svg" 
-                alt="Plan Left"
+                src={`/${currentGroup}.png`}
+                alt={`Plan ${currentGroup}`}
                 fill
                 className="object-contain"
               />
             </div>
           </div>
 
-          {/* Button section - fixed at bottom */}
+          {/* Button section - fixed at bottom  jwklad */}
           <div className="h-[150px] md:h-[25%] p-4 flex items-center">
             <button
               onClick={() => setIsDesignOpen(true)}

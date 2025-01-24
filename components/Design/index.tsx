@@ -26,29 +26,29 @@ interface CategoryOptions {
 
 const categoryOptionsMap: Record<string, CategoryOptions> = {
   '食品饮品': {
-    elements: ['水果插画', '蔬菜插画', '谷物图案', '零食', '流动水滴', '茶叶线条', '陶瓷碗盘'],
-    styles: ['自然手绘', '简约田园', '欧式复古纹理', '现代极简', '乡村风格'],
-    colors: ['清新绿色', '温暖黄色', '奶油白', '深棕色', '柔和草绿色', '咖啡色']
+    elements: ['采摘篮', '果园', '流动水滴', '零食', '烘焙食品'],
+    styles: ['现代极简', '简约田园', '温暖治愈', '像素风', '剪纸风'],
+    colors: ['清新绿', '温暖黄', '奶油白', '清透蓝', '活力橙']
   },
   '生活百货': {
-    elements: ['家居用品插画', '藤蔓植物图案', '温馨生活场景', '编织网纹', '可爱动物剪影', '木纹肌理', '布料纹路', '简约几何'],
-    styles: ['北欧极简', '温暖治愈', '复古日系手绘', '生态环保质感', '现代家居风', '实用美学'],
-    colors: ['自然米色', '柔和粉蓝', '天空蓝', '淡草绿色', '优雅灰', '原木自然色']
+    elements: ['家居用品', '可爱动物', '温馨生活', '竹子', '亭子'],
+    styles: ['平面插画', '现代极简', '实用美学', '剪纸风'],
+    colors: ['淡灰蓝', '暖米白', '柔和粉蓝', '明亮黄', '清新绿']
   },
   '服装鞋包': {
-    elements: ['精致织物纹理', '时尚服饰图标', '流畅缝纫线条', '抽象绳结设计', '时尚符号插画'],
-    styles: ['高级极简', '都市优雅', '街头复古', '艺术拼贴设计', '前卫时尚风'],
-    colors: ['经典黑白', '现代时尚红', '复古牛仔蓝', '象牙白', '柔和棕', '裸粉色', '深棕调', '奶油白', '沉稳灰色']
+    elements: ['时尚服饰', '时尚符号', '衣架', '织物纹理', '手袋轮廓'],
+    styles: ['艺术拼贴', '动感活力', '复古怀旧', '像素风', '剪纸风', '时尚大片'],
+    colors: ['牛仔蓝', '象牙白', '裸粉色', '经典黑白', '莫兰迪色系']
   },
   '宠物用品': {
-    elements: ['趣味爪印', '小骨头插画', '卡通宠物玩具', '宠物形状剪影', '简约鱼骨线条'],
-    styles: ['可爱卡通', '生态自然', '温馨家居', '现代趣味插画', '极简设计'],
-    colors: ['柔和湖蓝', '活力草绿', '温暖奶油黄', '深炭灰', '自然卡其色', '活力橙调', '简约米白', '浅蓝渐变']
+    elements: ['童趣云朵', '小动物', '可爱星星', '爪印', '自然植物'],
+    styles: ['自然手绘', '卡通可爱', '活泼趣味', '现代简约', '像素风', '剪纸风'],
+    colors: ['浅蓝色', '奶油白', '温暖黄', '清新绿', '淡粉色']
   },
   '母婴亲子': {
-    elements: ['柔软奶瓶', '摇篮插画', '童趣云朵', '卡通小动物', '可爱星星', '婴儿小脚印', '玩具抽象形状'],
-    styles: ['治愈系童趣', '家庭温馨设计', '手绘卡通', '简洁清新', '高端品牌风', '柔软贴近自然'],
-    colors: ['柔软粉调', '清新淡蓝', '温暖阳光黄', '自然奶白', '柔和薄绿', '暖调奶黄色']
+    elements: ['摇篮', '奶瓶', '花朵', '云朵', '星星', '亲子玩耍'],
+    styles: ['温馨治愈', '像素风', '剪纸风', '简约柔和'],
+    colors: ['柔粉色', '浅蓝色', '奶油白', '薄荷绿', '柔和米黄']
   }
 };
 
@@ -199,7 +199,11 @@ const Design: React.FC<DesignProps> = ({ isOpen, onClose }) => {
     }
 
     try {
-      const prompt = `为${designConfig.productType}设计一个包装，包含${designConfig.element}元素，采用${designConfig.style}风格，主色调为${designConfig.color}。商业摄影品质，电影级光照，锐利的边缘。`;
+      const elementText = customInputs.element ? `${designConfig.element}和${customInputs.element}` : designConfig.element;
+      const styleText = customInputs.style ? `${designConfig.style}和${customInputs.style}` : designConfig.style;
+      const colorText = customInputs.color ? `${designConfig.color}和${customInputs.color}` : designConfig.color;
+      
+      const prompt = `为${designConfig.productType}设计一个包装纸，包含${elementText}元素，采用${styleText}风格，主色调为${colorText}。商业摄影品质，电影级光照，锐利的边缘。`;
 
       const response = await fetch('/api/generate-image', {
         method: 'POST',
