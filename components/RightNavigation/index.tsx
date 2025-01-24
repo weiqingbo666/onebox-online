@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Design from '../Design';
+import Image from "next/image";
+import Design from "@/components/Design";
+import ImageModal from "@/components/ImageModal";
 
 interface RightNavigationProps {
   currentPrompt: string;
@@ -9,6 +10,7 @@ interface RightNavigationProps {
 
 const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt, currentGroup }) => {
   const [isDesignOpen, setIsDesignOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   return (
     <div className="h-auto md:h-screen flex items-center">
@@ -25,8 +27,11 @@ const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt, curren
           </div>
           
           {/* Image section - fixed height */}
-          <div className="h-[250px] md:h-[45%] w-full p-4 bg-white rounded-lg shadow-sm mb-4">
-            <div className="relative w-full h-full">
+          <div className="h-[250px] md:h-[60%] w-full p-4 bg-[#fbfeed] rounded-lg shadow-sm mb-4">
+            <div 
+              className="relative w-full h-full cursor-pointer"
+              onClick={() => setIsImageModalOpen(true)}
+            >
               <Image 
                 src={`/${currentGroup}.png`}
                 alt={`Plan ${currentGroup}`}
@@ -36,7 +41,7 @@ const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt, curren
             </div>
           </div>
 
-          {/* Button section - fixed at bottom  jwklad */}
+          {/* Button section - fixed at bottom */}
           <div className="h-[150px] md:h-[25%] p-4 flex items-center">
             <button
               onClick={() => setIsDesignOpen(true)}
@@ -58,6 +63,13 @@ const RightNavigation: React.FC<RightNavigationProps> = ({ currentPrompt, curren
         <Design 
           isOpen={isDesignOpen} 
           onClose={() => setIsDesignOpen(false)} 
+        />
+
+        <ImageModal
+          src={`/${currentGroup}.png`}
+          alt={`Plan ${currentGroup}`}
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
         />
       </div>
     </div>

@@ -115,9 +115,32 @@ export class Database {
   // 验证验证码
   static async verifyCode(email: string, code: string, type: 'LOGIN' | 'REGISTER'): Promise<boolean> {
     try {
-      // 使用UTC时间进行比较
-      const [rows] = await pool.execute(
+      console.log('Verifying code with params:', {
+        email,
+        code,
+        type,
+        currentTime: new Date().toISOString()
+      });
+
+      // 首先检查是否存在任何验证码记录
+      const [allCodes] = await pool.execute(
         `SELECT * FROM verification_codes 
+         WHERE email = ? 
+         AND type = ?
+         ORDER BY created_at DESC LIMIT 1`,
+        [email, type]
+      );
+      
+      console.log('Found verification codes:', allCodes);
+
+      if (Array.isArray(allCodes) && allCodes.length === 0) {
+        console.log('No verification code found for this email');
+        return false;
+      }
+
+      // 获取有效的验证码
+      const [rows] = await pool.execute(
+        `SELECT *, NOW() as current_time FROM verification_codes 
          WHERE email = ? 
          AND UPPER(code) = UPPER(?) 
          AND type = ? 
@@ -126,19 +149,35 @@ export class Database {
         [email, code, type]
       );
       
-      const codes = rows as VerificationCode[];
+      const codes = rows as any[];
+      
       if (codes.length === 0) {
-        console.log('No valid code found for:', { email, code, type });
+        // 获取最近的验证码记录（包括已过期的）用于调试
+        const [expiredCodes] = await pool.execute(
+          `SELECT *, NOW() as current_time FROM verification_codes 
+           WHERE email = ? 
+           AND type = ?
+           ORDER BY created_at DESC LIMIT 1`,
+          [email, type]
+        );
+        
+        console.log('No valid code found. Debug info:', {
+          expiredCodes,
+          currentTime: new Date().toISOString(),
+          serverTime: (expiredCodes as any[])[0]?.current_time
+        });
+        
         return false;
       }
 
-      // 记录验证成功的验证码信息（用于调试）
+      const validCode = codes[0];
       console.log('Valid code found:', {
-        email,
-        code,
-        type,
-        expiresAt: codes[0].expires_at,
-        now: new Date()
+        codeDetails: {
+          ...validCode,
+          password: undefined // 不记录密码
+        },
+        currentTime: new Date().toISOString(),
+        serverTime: validCode.current_time
       });
 
       return true;

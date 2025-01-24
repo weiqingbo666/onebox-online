@@ -15,6 +15,12 @@ export async function POST(request: NextRequest) {
   try {
     const { email, type } = await request.json();
 
+    console.log('Received code request:', {
+      email,
+      type,
+      timestamp: new Date().toISOString()
+    });
+
     if (!email || !type) {
       return NextResponse.json(
         { error: '邮箱和类型不能为空' },
@@ -24,28 +30,54 @@ export async function POST(request: NextRequest) {
 
     // 生成验证码
     const code = generateVerificationCode();
-
-    // 保存验证码到数据库
-    await Database.saveVerificationCode(email, code, type);
+    console.log('Generated verification code:', {
+      code,
+      email,
+      type,
+      timestamp: new Date().toISOString()
+    });
 
     try {
+      // 保存验证码到数据库
+      await Database.saveVerificationCode(email, code, type);
+      console.log('Verification code saved to database');
+
       // 发送验证码邮件
       await sendVerificationEmail(email, code, type);
-    } catch (emailError) {
-      console.error('Send email error:', emailError);
+      console.log('Verification email sent successfully');
+
+    } catch (error) {
+      console.error('Error in code sending process:', {
+        error,
+        email,
+        type,
+        timestamp: new Date().toISOString()
+      });
+
+
+
       return NextResponse.json(
-        { error: '发送验证码邮件失败，请检查邮箱地址是否正确' },
+        { error: '发送验证码失败，请重试' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({
+    // 返回响应
+    const response = {
       message: '验证码已发送',
-      // 仅在开发环境返回验证码
-      code: process.env.NODE_ENV === 'development' ? code : undefined
+      // 在开发环境或测试环境返回验证码
+      code: process.env.NODE_ENV !== 'production' ? code : undefined,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Sending response:', {
+      ...response,
+      code: '***' // 日志中隐藏验证码
     });
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Send code error:', error);
+    console.error('Unexpected error in send-code route:', error);
     return NextResponse.json(
       { error: '发送验证码失败，请重试' },
       { status: 500 }
