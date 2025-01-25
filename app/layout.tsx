@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "一个盒子Onebox",
     images: [
       {
-        url: "/public/logo.svg",
+        url: "favicon.ico",
         width: 1200,
         height: 630,
         alt: "一个盒子Onebox - 专业包装盒设计平台",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "一个盒子Onebox - 专业包装盒设计定制平台",
     description: "专注于为品牌提供创新的包装解决方案，通过AI智能设计提供完美的包装体验",
-    images: ["/public/logo.svg"],
+    images: ["favicon.ico"],
     site: "@onebox",
     creator: "@onebox"
   },
@@ -94,8 +94,8 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="icon" href="/public/logo.svg" sizes="any" />
-        <link rel="apple-touch-icon" href="/public/logo.svg" />
+        <link rel="icon" href="favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="favicon.ico" />
         <GoogleAnalytics />
       </head>
       <body className="dark">
