@@ -11,6 +11,7 @@ interface DialogProps {
   cancelText?: string;
   onConfirm?: () => void;
   onCancel?: () => void;
+  autoCloseDelay?: number;
 }
 
 const Dialog: React.FC<DialogProps> = ({
@@ -23,8 +24,10 @@ const Dialog: React.FC<DialogProps> = ({
   cancelText = '取消',
   onConfirm,
   onCancel,
+  autoCloseDelay = 3000,
 }) => {
   const [, setIsClosing] = useState(false);
+  const [autoCloseTimer, setAutoCloseTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,6 +39,23 @@ const Dialog: React.FC<DialogProps> = ({
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+      }
+      const timer = setTimeout(() => {
+        handleClose();
+      }, autoCloseDelay);
+      setAutoCloseTimer(timer);
+    }
+    return () => {
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+      }
+    };
+  }, [isOpen, autoCloseDelay]);
 
   const handleClose = () => {
     setIsClosing(true);

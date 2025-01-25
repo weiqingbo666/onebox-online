@@ -81,8 +81,13 @@ export class Database {
   // 保存验证码
   static async saveVerificationCode(email: string, code: string, type: 'LOGIN' | 'REGISTER') {
     try {
-      // 设置过期时间为10分钟后
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      // 设置过期时间为10分钟后，使用本地时间
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
+
+      // 手动格式化日期为MySQL datetime格式 (YYYY-MM-DD HH:mm:ss)
+      const pad = (num: number) => num.toString().padStart(2, '0');
+      const formattedExpiresAt = `${expiresAt.getFullYear()}-${pad(expiresAt.getMonth() + 1)}-${pad(expiresAt.getDate())} ${pad(expiresAt.getHours())}:${pad(expiresAt.getMinutes())}:${pad(expiresAt.getSeconds())}`;
       
       // 删除该邮箱之前的验证码
       await pool.execute(
@@ -90,19 +95,16 @@ export class Database {
         [email, type]
       );
 
-      // 保存新的验证码，使用UTC时间
+      // 保存新的验证码
       const [result] = await pool.execute(
-        `INSERT INTO verification_codes (email, code, type, expires_at)
-         VALUES (?, ?, ?, ?)`,
-        [email, code, type, expiresAt]
+        'INSERT INTO verification_codes (email, code, type, expires_at) VALUES (?, ?, ?, ?)',
+        [email, code, type, formattedExpiresAt]
       );
 
-      // 记录保存的验证码信息（用于调试）
       console.log('Verification code saved:', {
         email,
-        code,
-        type,
-        expiresAt
+        expiresAt: formattedExpiresAt,
+        currentTime: now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
       });
 
       return result;
@@ -115,72 +117,33 @@ export class Database {
   // 验证验证码
   static async verifyCode(email: string, code: string, type: 'LOGIN' | 'REGISTER'): Promise<boolean> {
     try {
+      const now = new Date();
+      const pad = (num: number) => num.toString().padStart(2, '0');
+      const formattedNow = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
       console.log('Verifying code with params:', {
         email,
         code,
         type,
-        currentTime: new Date().toISOString()
+        currentTime: formattedNow
       });
 
-      // 首先检查是否存在任何验证码记录
-      const [allCodes] = await pool.execute(
-        `SELECT * FROM verification_codes 
-         WHERE email = ? 
-         AND type = ?
-         ORDER BY created_at DESC LIMIT 1`,
-        [email, type]
-      );
-      
-      console.log('Found verification codes:', allCodes);
-
-      if (Array.isArray(allCodes) && allCodes.length === 0) {
-        console.log('No verification code found for this email');
-        return false;
-      }
-
-      // 获取有效的验证码
+      // 获取验证码记录并检查是否过期
       const [rows] = await pool.execute(
-        `SELECT *, NOW() as current_time FROM verification_codes 
-         WHERE email = ? 
-         AND UPPER(code) = UPPER(?) 
-         AND type = ? 
-         AND expires_at > NOW()
-         ORDER BY created_at DESC LIMIT 1`,
-        [email, code, type]
+        'SELECT * FROM verification_codes WHERE email = ? AND code = ? AND type = ? AND expires_at > ? ORDER BY created_at DESC LIMIT 1',
+        [email, code, type, formattedNow]
       );
       
       const codes = rows as any[];
+      const isValid = codes.length > 0;
       
-      if (codes.length === 0) {
-        // 获取最近的验证码记录（包括已过期的）用于调试
-        const [expiredCodes] = await pool.execute(
-          `SELECT *, NOW() as current_time FROM verification_codes 
-           WHERE email = ? 
-           AND type = ?
-           ORDER BY created_at DESC LIMIT 1`,
-          [email, type]
-        );
-        
-        console.log('No valid code found. Debug info:', {
-          expiredCodes,
-          currentTime: new Date().toISOString(),
-          serverTime: (expiredCodes as any[])[0]?.current_time
-        });
-        
-        return false;
-      }
-
-      const validCode = codes[0];
-      console.log('Valid code found:', {
-        codeDetails: {
-          ...validCode,
-          password: undefined // 不记录密码
-        },
-        currentTime: new Date().toISOString(),
-        serverTime: validCode.current_time
+      console.log('Code validation:', {
+        found: codes.length > 0,
+        isValid,
+        currentTime: formattedNow
       });
 
-      return true;
+      return isValid;
     } catch (error) {
       console.error('Error verifying code:', error);
       throw error;

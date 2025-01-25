@@ -9,10 +9,9 @@ const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  timezone: '+00:00', // 使用UTC时区
+  timezone: '+08:00', // 使用中国时区
   dateStrings: true   // 将日期作为字符串返回
 };
-
 
 // 数据库配置
 //   datasource:
@@ -30,8 +29,6 @@ const dbConfig = {
 //   connectionLimit: 10,
 //   queueLimit: 0
 // };
-
-
 
 const pool = mysql.createPool(dbConfig);
 

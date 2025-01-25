@@ -469,6 +469,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
         message={dialog.message}
         type={dialog.type}
         confirmText="确定"
+        autoCloseDelay={1000} // 5 seconds
       />
     </>
   );
