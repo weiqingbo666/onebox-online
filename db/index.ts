@@ -40,19 +40,43 @@ export class Database {
         password_hash = await bcrypt.hash(password, 10);
       }
 
+      console.log('Creating user:', { 
+        email,
+        hasPassword: !!password,
+        timestamp: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      });
+
       const [result] = await pool.execute(
         `INSERT INTO oneboxusers (email, password_hash) VALUES (?, ?)`,
         [email, password_hash]
       );
 
-      const [user] = await pool.execute(
+      if (!(result as any).insertId) {
+        throw new Error('Failed to insert user');
+      }
+
+      const [userRows] = await pool.execute(
         'SELECT * FROM oneboxusers WHERE id = ?',
         [(result as any).insertId]
       );
 
-      return (user as any[])[0];
+      const users = userRows as any[];
+      if (!users || users.length === 0) {
+        throw new Error('User created but not found');
+      }
+
+      console.log('User created successfully:', {
+        email,
+        userId: users[0].id,
+        timestamp: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      });
+
+      return users[0];
     } catch (error) {
       console.error('Error creating user:', error);
+      if (error instanceof Error && error.message.includes('Duplicate entry')) {
+        throw new Error('该邮箱已被注册');
+      }
       throw error;
     }
   }
@@ -60,12 +84,26 @@ export class Database {
   // 通过邮箱查找用户
   static async findUserByEmail(email: string): Promise<User | null> {
     try {
+      console.log('Finding user by email:', {
+        email,
+        timestamp: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      });
+
       const [rows] = await pool.execute(
         'SELECT * FROM oneboxusers WHERE email = ?',
         [email]
       );
+      
       const users = rows as User[];
-      return users[0] || null;
+      const found = users[0] || null;
+
+      console.log('User search result:', {
+        email,
+        found: !!found,
+        timestamp: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      });
+
+      return found;
     } catch (error) {
       console.error('Error finding user:', error);
       throw error;
@@ -74,8 +112,28 @@ export class Database {
 
   // 验证密码
   static async verifyPassword(user: User, password: string): Promise<boolean> {
-    if (!user.password_hash) return false;
-    return bcrypt.compare(password, user.password_hash);
+    try {
+      if (!user.password_hash) {
+        console.log('Password verification failed: No password hash', {
+          userId: user.id,
+          email: user.email
+        });
+        return false;
+      }
+
+      const isValid = await bcrypt.compare(password, user.password_hash);
+      console.log('Password verification result:', {
+        userId: user.id,
+        email: user.email,
+        isValid,
+        timestamp: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })
+      });
+
+      return isValid;
+    } catch (error) {
+      console.error('Error verifying password:', error);
+      return false;
+    }
   }
 
   // 保存验证码

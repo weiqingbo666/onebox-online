@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import Dialog from '../Common/Dialog';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface LoginProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
     }, 1000);
   }, []);
 
-  const handleSendCode = async () => {
+  const handleSendCode = useCallback(async () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showDialog('请输入正确的邮箱地址', 'warning');
       return;
@@ -78,9 +79,11 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
       console.error('Failed to send verification code:', error);
       showDialog(error instanceof Error ? error.message : '发送验证码失败，请重试', 'error');
     }
-  };
+  }, [email, isRegistering, showDialog, startCountdown]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const debouncedSendCode = useDebounce(handleSendCode, 1000);
+
+  const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!agreedToTerms) {
@@ -120,9 +123,11 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
       console.error('Login failed:', error);
       showDialog(error instanceof Error ? error.message : '登录失败，请重试', 'error');
     }
-  };
+  }, [agreedToTerms, email, loginType, onClose, onLoginSuccess, password, showDialog, verificationCode]);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const debouncedLogin = useDebounce(handleLogin, 1000);
+
+  const handleRegister = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showDialog('请输入正确的邮箱地址', 'warning');
@@ -180,7 +185,9 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
       console.error('Registration failed:', error);
       showDialog(error instanceof Error ? error.message : '注册失败，请重试', 'error');
     }
-  };
+  }, [agreedToTerms, confirmPassword, email, password, setIsRegistering, showDialog, verificationCode]);
+
+  const debouncedRegister = useDebounce(handleRegister, 1000);
 
   if (!isOpen) return null;
 
@@ -286,7 +293,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                           ) : (
                             <button
                               type="button"
-                              onClick={handleSendCode}
+                              onClick={debouncedSendCode}
                               disabled={countdown > 0}
                               className={`px-4 whitespace-nowrap ${countdown > 0 ? 'text-gray-400' : 'text-green-500'}`}
                             >
@@ -315,6 +322,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                       {/* Login Button */}
                       <button
                         type="submit"
+                        onClick={debouncedLogin}
                         className="w-full py-3 bg-[#c3f53b] rounded-full text-black font-medium hover:bg-[#b5e48c] transition-colors"
                       >
                         登录
@@ -362,7 +370,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                           />
                           <button
                             type="button"
-                            onClick={handleSendCode}
+                            onClick={debouncedSendCode}
                             disabled={countdown > 0}
                             className={`px-4 whitespace-nowrap ${countdown > 0 ? 'text-gray-400' : 'text-green-500'}`}
                           >
@@ -440,6 +448,7 @@ const Login: React.FC<LoginProps> = ({ isOpen, onClose, onLoginSuccess }) => {
                       {/* Register Button */}
                       <button
                         type="submit"
+                        onClick={debouncedRegister}
                         className="w-full py-3 bg-[#c3f53b] rounded-full text-black font-medium hover:bg-[#b5e48c] transition-colors"
                       >
                         注册
